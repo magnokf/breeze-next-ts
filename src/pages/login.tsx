@@ -1,16 +1,23 @@
 import AuthCard from '@/components/AuthCard'
 import AuthSessionStatus from '@/components/AuthSessionStatus'
-import GuestLayout from '@/components/Layouts/GuestLayout'
+import Checkbox from '@/components/Checkbox'
 import Input from '@/components/Input'
 import InputError from '@/components/InputError'
 import Label from '@/components/Label'
-import Link from 'next/link'
-import { useAuth } from '@/hooks/auth'
-import { useEffect, useState, FormEventHandler } from 'react'
-import { useRouter } from 'next/router'
-import Head from 'next/head'
-import Checkbox from '@/components/Checkbox'
+import GuestLayout from '@/components/Layouts/GuestLayout'
 import PrimaryButton from '@/components/PrimaryButton'
+import { useAuth } from '@/hooks/auth'
+import Head from 'next/head'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { FormEventHandler, useEffect, useState } from 'react'
+
+interface ErrorMessages {
+    rg_cbmerj?: string[]
+    email?: string[]
+    password?: string[]
+    length?: number
+}
 
 const Login = () => {
     const { query } = useRouter()
@@ -21,13 +28,14 @@ const Login = () => {
     })
 
     const [email, setEmail] = useState('')
+    const [rg_cbmerj, setRg_cbmerj] = useState('')
     const [password, setPassword] = useState('')
     const [shouldRemember, setShouldRemember] = useState(false)
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState<ErrorMessages>({})
     const [status, setStatus] = useState<string | null>(null)
 
     useEffect(() => {
-        const reset = query && query.reset ? query.reset as string : ''
+        const reset = query && query.reset ? (query.reset as string) : ''
         if (reset.length > 0 && errors.length === 0) {
             setStatus(atob(reset))
         } else {
@@ -35,30 +43,55 @@ const Login = () => {
         }
     })
 
-    const submitForm: FormEventHandler = async (event) => {
+    const submitForm: FormEventHandler = async event => {
         event.preventDefault()
 
         login({
-            email,
+            rg_cbmerj,
             password,
             remember: shouldRemember,
             setErrors,
             setStatus,
         })
     }
+    const handleChangeRg_cbmerj = (event: any) => {
+        const rg_cbmerj = event.target.value
+
+        // only allow numbers and only 7 digits
+        setRg_cbmerj(rg_cbmerj.replace(/\D/g, '').slice(0, 7))
+    }
 
     return (
         <GuestLayout>
             <Head>
-                <title>Laravel - Login</title>
+                <title>ProgPlan - Login</title>
             </Head>
             <AuthCard>
                 {/* Session Status */}
                 <AuthSessionStatus className="mb-4" status={status} />
 
                 <form onSubmit={submitForm}>
-                    {/* Email Address */}
+                    {/* rg_cbmerj */}
                     <div>
+                        <Label htmlFor="rg_cbmerj">RG CBMERJ</Label>
+
+                        <Input
+                            id="rg_cbmerj"
+                            type="text"
+                            value={rg_cbmerj}
+                            className="block mt-1 w-full"
+                            onChange={handleChangeRg_cbmerj}
+                            required
+                            isFocused={true}
+                        />
+
+                        <InputError
+                            messages={errors.rg_cbmerj}
+                            className="mt-2"
+                        />
+                    </div>
+                    {/* Email Address */}
+                    {/* <div className="mt-4">
                         <Label htmlFor="email">Email</Label>
 
                         <Input
@@ -72,7 +105,7 @@ const Login = () => {
                         />
 
                         <InputError messages={errors.email} className="mt-2" />
-                    </div>
+                    </div> */}
 
                     {/* Password */}
                     <div className="mt-4">
@@ -88,7 +121,10 @@ const Login = () => {
                             autoComplete="current-password"
                         />
 
-                        <InputError messages={errors.password} className="mt-2" />
+                        <InputError
+                            messages={errors.password}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Remember Me */}
@@ -96,7 +132,6 @@ const Login = () => {
                         <label
                             htmlFor="remember_me"
                             className="inline-flex items-center">
-
                             <Checkbox
                                 id="remember_me"
                                 name="remember"
@@ -106,7 +141,7 @@ const Login = () => {
                                 }
                             />
                             <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                Remember me
+                                Lembrar minha senha
                             </span>
                         </label>
                     </div>
@@ -115,7 +150,7 @@ const Login = () => {
                         <Link
                             href="/forgot-password"
                             className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            Forgot your password?
+                            Esqueceu sua senha?
                         </Link>
 
                         <PrimaryButton className="ml-4">Login</PrimaryButton>

@@ -1,7 +1,7 @@
-import useSWR from 'swr'
 import axios, { csrf } from '@/lib/axios'
-import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import useSWR from 'swr'
 
 declare type AuthMiddleware = 'auth' | 'guest'
 
@@ -10,15 +10,23 @@ interface IUseAuth {
     redirectIfAuthenticated?: string
 }
 
+interface ErrorMessages {
+    rg_cbmerj?: string[]
+    name?: string[]
+    email?: string[]
+    password?: string[]
+    password_confirmation?: string[]
+}
+
 interface IApiRequest {
-    setErrors: React.Dispatch<React.SetStateAction<never[]>>
+    setErrors: React.Dispatch<React.SetStateAction<ErrorMessages>>
     setStatus: React.Dispatch<React.SetStateAction<any | null>>
     [key: string]: any
 }
 
 export interface User {
     id?: number
-    name?: string
+    rg_cbmerj?: string
     email?: string
     email_verified_at?: string
     must_verify_email?: boolean // this is custom attribute
@@ -29,7 +37,11 @@ export interface User {
 export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
     const router = useRouter()
 
-    const { data: user, error, mutate } = useSWR<User>('/api/user', () =>
+    const {
+        data: user,
+        error,
+        mutate,
+    } = useSWR<User>('/api/user', () =>
         axios
             .get('/api/user')
             .then(res => res.data)
@@ -45,7 +57,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
 
         await csrf()
 
-        setErrors([])
+        setErrors({})
 
         axios
             .post('/register', props)
@@ -62,7 +74,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
 
         await csrf()
 
-        setErrors([])
+        setErrors({})
         setStatus(null)
 
         axios
@@ -78,7 +90,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
         const { setErrors, setStatus, email } = args
         await csrf()
 
-        setErrors([])
+        setErrors({})
         setStatus(null)
 
         axios
@@ -95,7 +107,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
         const { setErrors, setStatus, ...props } = args
         await csrf()
 
-        setErrors([])
+        setErrors({})
         setStatus(null)
 
         axios
@@ -125,15 +137,20 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
 
         window.location.pathname = '/login'
     }
-
     useEffect(() => {
-        if (middleware === 'guest' && redirectIfAuthenticated && user)
-            router.push(redirectIfAuthenticated)
+        if (middleware === 'guest' && redirectIfAuthenticated && user) {
+            if (redirectIfAuthenticated) {
+                router.push(redirectIfAuthenticated)
+            }
+        }
         if (
             window.location.pathname === '/verify-email' &&
             user?.email_verified_at
-        )
-            router.push(redirectIfAuthenticated)
+        ) {
+            if (redirectIfAuthenticated) {
+                router.push(redirectIfAuthenticated)
+            }
+        }
         if (middleware === 'auth' && error) logout()
     }, [user, error])
 

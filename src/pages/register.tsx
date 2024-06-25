@@ -1,61 +1,78 @@
 import AuthCard from '@/components/AuthCard'
-import GuestLayout from '@/components/Layouts/GuestLayout'
 import Input from '@/components/Input'
 import InputError from '@/components/InputError'
 import Label from '@/components/Label'
-import Link from 'next/link'
-import { useAuth } from '@/hooks/auth'
-import { useState, FormEventHandler } from 'react'
-import Head from 'next/head'
+import GuestLayout from '@/components/Layouts/GuestLayout'
 import PrimaryButton from '@/components/PrimaryButton'
+import { useAuth } from '@/hooks/auth'
+import Head from 'next/head'
+import Link from 'next/link'
+import { FormEventHandler, useState } from 'react'
+
+interface ErrorMessages {
+    rg_cbmerj?: string[]
+    email?: string[]
+    password?: string[]
+    password_confirmation?: string[]
+}
 
 const Register = () => {
     const { register } = useAuth({
         middleware: 'guest',
         redirectIfAuthenticated: '/dashboard',
     })
-
-    const [name, setName] = useState('')
+    const [rg_cbmerj, setRg_cbmerj] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState<ErrorMessages>({})
 
     const submitForm: FormEventHandler = event => {
         event.preventDefault()
 
         register({
-            name,
+            rg_cbmerj,
             email,
             password,
             password_confirmation: passwordConfirmation,
             setErrors,
-            setStatus: () => { }
+            setStatus: () => {},
         })
+    }
+
+    const handleChangeRg_cbmerj = (event: any) => {
+        const rg_cbmerj = event.target.value
+
+        // only allow numbers and only 7 digits
+        setRg_cbmerj(rg_cbmerj.replace(/\D/g, '').slice(0, 7))
     }
 
     return (
         <GuestLayout>
             <Head>
-                <title>Laravel - Register</title>
+                <title>ProgPlan - Cadastro de Concorrentes</title>
             </Head>
             <AuthCard>
                 <form onSubmit={submitForm}>
-                    {/* Name */}
+                    
+                    {/* rg */}
                     <div>
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="rg_cbmerj">RG CBMERJ</Label>
 
                         <Input
-                            id="name"
+                            id="rg_cbmerj"
                             type="text"
-                            value={name}
+                            value={rg_cbmerj}
                             className="block mt-1 w-full"
-                            onChange={event => setName(event.target.value)}
+                            onChange={handleChangeRg_cbmerj}
                             required
                             autoFocus
                         />
 
-                        <InputError messages={errors.name} className="mt-2" />
+                        <InputError
+                            messages={errors.rg_cbmerj}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Email Address */}
@@ -88,7 +105,10 @@ const Register = () => {
                             autoComplete="new-password"
                         />
 
-                        <InputError messages={errors.password} className="mt-2" />
+                        <InputError
+                            messages={errors.password}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Confirm Password */}
@@ -108,7 +128,10 @@ const Register = () => {
                             required
                         />
 
-                        <InputError messages={errors.password_confirmation} className="mt-2" />
+                        <InputError
+                            messages={errors.password_confirmation}
+                            className="mt-2"
+                        />
                     </div>
 
                     <div className="flex items-center justify-end mt-4">

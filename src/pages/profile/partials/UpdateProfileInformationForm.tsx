@@ -1,24 +1,28 @@
-import { useState, FormEventHandler, useEffect } from 'react'
 import Input from '@/components/Input'
 import InputError from '@/components/InputError'
 import Label from '@/components/Label'
-import axios, { csrf } from '@/lib/axios'
-import { useAuth } from '@/hooks/auth'
-import { Transition } from '@headlessui/react'
 import PrimaryButton from '@/components/PrimaryButton'
+import { useAuth } from '@/hooks/auth'
+import axios, { csrf } from '@/lib/axios'
+import { Transition } from '@headlessui/react'
+import { FormEventHandler, useEffect, useState } from 'react'
+
+interface ErrorMessages {
+    rg_cbmerj?: string[]
+    email?: string[]
+    password?: string[]
+    password_confirmation?: string[]
+}
 
 const UpdateProfileInformationForm = () => {
     const { user, resendEmailVerification } = useAuth({ middleware: 'auth' })
-
-    const [name, setName] = useState('')
     const [email, setEmail] = useState('')
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState<ErrorMessages>({})
     const [status, setStatus] = useState(null)
 
     useEffect(() => {
         if (user !== undefined) {
-            setName(user.name)
-            setEmail(user.email)
+            setEmail(user.email ?? '')
         }
     }, [user])
 
@@ -27,11 +31,11 @@ const UpdateProfileInformationForm = () => {
 
         await csrf()
 
-        setErrors([])
+        setErrors({})
         setStatus(null)
 
         axios
-            .put('/api/profile', { name: name, email: email })
+            .put('/api/profile', { email: email })
             .then(response => setStatus(response.data.status))
             .catch(error => {
                 if (error.response.status !== 422) throw error
@@ -44,30 +48,15 @@ const UpdateProfileInformationForm = () => {
         <section>
             <header>
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Profile Information
+                    Informações do perfil
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Update your account's profile information and email address
+                    Atualize suas informações de e-mail.
                 </p>
             </header>
 
             <form onSubmit={submitForm} className="mt-6 space-y-6">
-                {/* Name */}
-                <div>
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                        id="name"
-                        type="text"
-                        name="name"
-                        value={name}
-                        className="block mt-1 w-full"
-                        onChange={event => setName(event.target.value)}
-                        required
-                        autoFocus
-                    />
-                    <InputError messages={errors.email} className="mt-2" />
-                </div>
                 {/* Email Address */}
                 <div>
                     <Label htmlFor="email">Email</Label>
@@ -85,47 +74,50 @@ const UpdateProfileInformationForm = () => {
                     <InputError messages={errors.email} className="mt-2" />
                 </div>
 
-                {user?.must_verify_email && user?.email_verified_at === null && (
-                    <div>
-                        <p className="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                            Your email address is unverified.
+                {user?.must_verify_email &&
+                    user?.email_verified_at === null && (
+                        <div>
+                            <p className="text-sm mt-2 text-gray-800 dark:text-gray-200">
+                                Seu email ainda não foi verificado.
+                                <button
+                                    className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+                                    onClick={() =>
+                                        resendEmailVerification({
+                                            setStatus,
+                                            setErrors: () => {},
+                                        })
+                                    }>
+                                    Clique aqui para reenviar o email de
+                                    verificação
+                                </button>
+                            </p>
 
-                            <button
-                                className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                                onClick={() => resendEmailVerification({
-                                    setStatus,
-                                    setErrors: () => { }
-                                })}
-                            >
-                                Click here to re-send the verification email.
-                            </button>
-                        </p>
-
-                        {status === 'verification-link-sent' && (
-                            <div className="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                                A new verification link has been sent to your email address.
-                            </div>
-                        )}
-                    </div>
-                )}
+                            {status === 'verification-link-sent' && (
+                                <div className="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                                    Um novo link de verificação foi enviado para
+                                    o seu email.
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton>Save</PrimaryButton>
+                    <PrimaryButton>Salvar</PrimaryButton>
 
                     {status === 'profile-updated' && (
                         <Transition
                             show={true}
                             enterFrom="opacity-0"
                             leaveTo="opacity-0"
-                            className="transition ease-in-out"
-                        >
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Saved.</p>
+                            className="transition ease-in-out">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Salvo com sucesso.
+                            </p>
                         </Transition>
                     )}
                 </div>
             </form>
         </section>
-
     )
 }
 

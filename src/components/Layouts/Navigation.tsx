@@ -1,11 +1,12 @@
 import ApplicationLogo from '@/components/ApplicationLogo'
 import Dropdown from '@/components/Dropdown'
-import Link from 'next/link'
+import DropdownLink, { DropdownButton } from '@/components/DropdownLink'
 import NavLink from '@/components/NavLink'
-import ResponsiveNavLink, { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
-import { DropdownButton } from '@/components/DropdownLink'
-import DropdownLink from '@/components/DropdownLink'
+import ResponsiveNavLink, {
+    ResponsiveNavButton,
+} from '@/components/ResponsiveNavLink'
 import { useAuth, User } from '@/hooks/auth'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
@@ -46,7 +47,7 @@ const Navigation = (user?: User) => {
                                 trigger={
                                     <span className="inline-flex rounded-md">
                                         <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                            {user?.name}
+                                            {user?.rg_cbmerj}
 
                                             <svg
                                                 className="ml-2 -mr-0.5 h-4 w-4"
@@ -64,10 +65,10 @@ const Navigation = (user?: User) => {
                                 {/* Authentication */}
                                 {/* TODO: add active state */}
                                 <DropdownLink href="/profile">
-                                    Profile
+                                    Perfil
                                 </DropdownLink>
                                 <DropdownButton onClick={logout}>
-                                    Logout
+                                    Sair
                                 </DropdownButton>
                             </Dropdown>
                         </div>
@@ -121,15 +122,21 @@ const Navigation = (user?: User) => {
                     <div className="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
                         <div className="px-4">
                             <div className="font-medium text-base text-gray-800 dark:text-gray-200">
-                                {user?.name}
+                                {user?.rg_cbmerj}
                             </div>
-                            <div className="font-medium text-sm text-gray-500">{user?.email}</div>
+                            <div className="font-medium text-sm text-gray-500">
+                                {user?.email}
+                            </div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href="/profile" active={router.pathname === '/profile'}>Profile</ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                href="/profile"
+                                active={router.pathname === '/profile'}>
+                                Profile
+                            </ResponsiveNavLink>
                             <ResponsiveNavButton onClick={logout}>
-                                Logout
+                                Sair
                             </ResponsiveNavButton>
                         </div>
                     </div>
