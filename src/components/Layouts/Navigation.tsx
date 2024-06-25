@@ -35,6 +35,11 @@ const Navigation = (user?: User) => {
                                 active={router.pathname === '/dashboard'}>
                                 Dashboard
                             </NavLink>
+                            <NavLink
+                                href="/concorrentes"
+                                active={router.pathname === '/concorrentes'}>
+                                Concorrentes
+                            </NavLink>
                         </div>
                     </div>
 

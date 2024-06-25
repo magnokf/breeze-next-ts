@@ -5,7 +5,7 @@ import PrimaryButton from '@/components/PrimaryButton'
 import { useAuth } from '@/hooks/auth'
 import axios, { csrf } from '@/lib/axios'
 import { Transition } from '@headlessui/react'
-import { FormEventHandler, useEffect, useState } from 'react'
+import { FormEventHandler, useEffect, useReducer, useState } from 'react'
 
 interface ErrorMessages {
     rg_cbmerj?: string[]
@@ -16,7 +16,10 @@ interface ErrorMessages {
 
 const UpdateProfileInformationForm = () => {
     const { user, resendEmailVerification } = useAuth({ middleware: 'auth' })
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useReducer(
+        (email: string, newEmail: string) => newEmail,
+        user?.email ?? '',
+    )
     const [errors, setErrors] = useState<ErrorMessages>({})
     const [status, setStatus] = useState(null)
 
@@ -78,7 +81,7 @@ const UpdateProfileInformationForm = () => {
                     user?.email_verified_at === null && (
                         <div>
                             <p className="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                                Seu email ainda não foi verificado.
+                                Por favor, confirme seu email.
                                 <button
                                     className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
                                     onClick={() =>
@@ -87,8 +90,9 @@ const UpdateProfileInformationForm = () => {
                                             setErrors: () => {},
                                         })
                                     }>
-                                    Clique aqui para reenviar o email de
-                                    verificação
+                                    {email && email !== 'null'
+                                        ? ' Clique aqui para reenviar o email de verificação'
+                                        : ' '}
                                 </button>
                             </p>
 

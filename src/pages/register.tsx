@@ -18,7 +18,7 @@ interface ErrorMessages {
 
 const Register = () => {
     const { register } = useAuth({
-        middleware: 'guest',
+        middleware: 'auth',
         redirectIfAuthenticated: '/dashboard',
     })
     const [rg_cbmerj, setRg_cbmerj] = useState('')
@@ -54,7 +54,6 @@ const Register = () => {
             </Head>
             <AuthCard>
                 <form onSubmit={submitForm}>
-                    
                     {/* rg */}
                     <div>
                         <Label htmlFor="rg_cbmerj">RG CBMERJ</Label>
