@@ -1,9 +1,33 @@
 import AppLayout from '@/components/Layouts/AppLayout'
 import Head from 'next/head'
-import { columns, Payment } from './Column'
+import { columns, ConcorrenteInterface } from './Column'
 import { DataTable } from './data-table'
 
-export default function Concorrentes({ data }: { data: Payment[] }) {
+
+export async function getServerSideProps() {
+    const data = await getData()
+    return { props: { data } }
+}
+
+async function getData(): Promise<ConcorrenteInterface[]> {
+    const url = `${process.env.NEXT_PUBLIC_API_CBMERJ_URL} + /concorrentes}`
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'secret-id': process.env.NEXT_PUBLIC_API_SECRET_ID,
+            'secret-key': process.env.NEXT_PUBLIC_API_SECRET_KEY,
+        } as HeadersInit,
+    })
+    return response.json()
+}
+
+export default function Concorrentes({
+    data,
+}: {
+    data: ConcorrenteInterface[]
+}) {
     return (
         <AppLayout
             header={
@@ -30,20 +54,4 @@ export default function Concorrentes({ data }: { data: Payment[] }) {
     )
 }
 
-export async function getServerSideProps() {
-    const data = await getData()
-    return { props: { data } }
-}
 
-async function getData(): Promise<Payment[]> {
-    // Fetch data from your API here.
-    return [
-        {
-            id: '728ed52f',
-            amount: 100,
-            status: 'pending',
-            email: 'm@example.com',
-        },
-        // Add more data items as needed...
-    ]
-}

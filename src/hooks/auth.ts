@@ -34,6 +34,18 @@ export interface User {
     updated_at?: string
 }
 
+export interface MilitarData {
+    nome_guerra: string
+    quadro: string
+    graduacao_abreviacao: string
+    obm_atual: string
+    lotacao: string
+    data_de_nascimento: string
+    rg: string
+    alistamento: string
+    foto: string
+}
+
 export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
     const router = useRouter()
 
@@ -51,6 +63,28 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
                 router.push('/verify-email')
             }),
     )
+
+    async function getMilitarData(rg_cbmerj: string | undefined) {
+        const url = process.env.NEXT_PUBLIC_API_CBMERJ_URL
+        const secret_id = process.env.NEXT_PUBLIC_API_CBMERJ_SECRET_ID
+        const secret_key = process.env.NEXT_PUBLIC_API_CBMERJ_SECRET_KEY
+        const response = await fetch(`${url}/militar/efetivo/search`, {
+            method: 'POST',
+            body: JSON.stringify({
+                rg: rg_cbmerj,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'secret-id': `${secret_id}`,
+                'secret-key': `${secret_key}`,
+            } as HeadersInit,
+        })
+        const data = await response.json()
+        console.log(data)
+
+        return data
+    }
 
     const register = async (args: IApiRequest) => {
         const { setErrors, ...props } = args
@@ -138,6 +172,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
         window.location.pathname = '/login'
     }
     useEffect(() => {
+        getMilitarData(user?.rg_cbmerj)
         if (middleware === 'guest' && redirectIfAuthenticated && user) {
             if (redirectIfAuthenticated) {
                 router.push(redirectIfAuthenticated)

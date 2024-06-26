@@ -1,39 +1,42 @@
 'use client'
 
-import { ColumnDef } from '@tanstack/react-table'
+import { CellContext, ColumnDef } from '@tanstack/react-table'
 
-// This type is used to define the shape of our data. e.g we want our id to be string and status none other than these four options
-export type Payment = {
-    id: string
-    amount: number
-    status: 'pending' | 'processing' | 'success' | 'failed'
-    email: string
+export interface ConcorrenteInterface {
+    data: {
+        nome_guerra: string
+        quadro: string
+        graduacao_abreviacao: string
+        obm_atual: string
+        lotacao: string
+        data_de_nascimento: string
+        rg: string
+        alistamento: string
+        foto: string
+    }
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<ConcorrenteInterface>[] = [
     //we can set normal fields like this
     {
-        accessorKey: 'status',
-        header: 'Status',
+        accessorKey: 'nome_guerra',
+        header: 'Nome de Guerra',
     },
     {
-        accessorKey: 'email',
-        header: 'Email',
+        accessorKey: 'obm_atual',
+        header: 'OBM Atual',
     },
     //
     {
-        accessorKey: 'amount',
-        header: () => <div className="text-right">Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue('amount'))
-            const formatted = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-            }).format(amount)
-
-            //we can format the amount in any currency without any use of external package
-
-            return <div className="text-right font-medium">{formatted}</div>
+        accessorKey: 'data_de_nascimento',
+        header: () => <div className="text-right">Data de Nascimento</div>,
+        cell: (props: CellContext<ConcorrenteInterface, unknown>) => {
+            const { row } = props
+            return (
+                <div className="text-right">
+                    {row.original.data.data_de_nascimento}
+                </div>
+            )
         },
     },
 ]
